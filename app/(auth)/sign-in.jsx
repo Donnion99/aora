@@ -30,7 +30,7 @@ const SignIn = () => {
       setIsLogged(true);
 
       Alert.alert("Success", "User signed in successfully");
-      router.replace("/home");
+      router.replace("/project");
     } catch (error) {
       Alert.alert("Error", error.message);
     } finally {
@@ -54,7 +54,7 @@ const SignIn = () => {
           />
 
           <Text className="text-2xl font-semibold text-white mt-10 font-psemibold">
-            Log in to Aora
+            Log in to Civix
           </Text>
 
           <FormField
