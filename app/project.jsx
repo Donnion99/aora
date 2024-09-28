@@ -8,25 +8,33 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 import { logout } from "./(tabs)/profile";
 import { images } from "../constants";
 import useAppwrite from "../lib/useAppwrite";
-import { getAllPosts, getLatestPosts, signOut } from "../lib/appwrite";
-import { EmptyState, SearchInput, Trending, VideoCard } from "../components";
-
+import {
+  getAllPosts,
+  getLatestPosts,
+  signOut,
+  getAllProjects,
+} from "../lib/appwrite";
+import { EmptyState, SearchInput, Trending } from "../components";
+import ProjectCard from "../components/ProjectCard";
 import { useGlobalContext } from "../context/GlobalProvider";
 import { router } from "expo-router";
+import CreateProject from "../components/CreateProject"; // Import the CreateProject component
 
 import { icons } from "../constants";
 
 const Home = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
 
-  const { data: posts, refetch } = useAppwrite(getAllPosts);
+  const { data: posts, refetch } = useAppwrite(getAllProjects);
   const { data: latestPosts } = useAppwrite(getLatestPosts);
 
   const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false); // State to control modal visibility
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -38,15 +46,16 @@ const Home = () => {
     await signOut();
     setUser(null);
     setIsLogged(false);
-
     router.replace("/sign-in");
   };
 
-  // one flatlist
-  // with list header
-  // and horizontal flatlist
-
-  //  we cannot do that with just scrollview as there's both horizontal and vertical scroll (two flat lists, within trending)
+  // Function to handle the project creation
+  const handleCreateProject = (projectData) => {
+    console.log("Project Created:", projectData);
+    // Here, you can call your function to save the project data
+    // Close the modal after submission
+    setModalVisible(false);
+  };
 
   return (
     <SafeAreaView className="bg-primary">
@@ -54,12 +63,11 @@ const Home = () => {
         data={posts}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
-          <VideoCard
-            title={item.title}
-            thumbnail={item.thumbnail}
-            video={item.video}
-            creator={item.creator.username}
-            avatar={item.creator.avatar}
+          <ProjectCard
+            title={item.Project_Name}
+            description={item.Description} // Assuming you have a description field
+            creator={user.username}
+            avatar={user.avatar}
           />
         )}
         ListHeaderComponent={() => (
@@ -73,7 +81,6 @@ const Home = () => {
                   {user?.username}
                 </Text>
               </View>
-
               <View className="mt-1.5">
                 <TouchableOpacity
                   onPress={logout}
@@ -87,20 +94,24 @@ const Home = () => {
                 </TouchableOpacity>
               </View>
             </View>
-
             <SearchInput placeholder={"Search your Project"} />
-
             <View className="w-full flex-1 pt-5 pb-8">
               <Text className="text-lg font-pregular text-gray-100 mb-3">
                 My Projects
               </Text>
+              {/* Add the Create Project button here */}
+              <Button
+                title="Create Project"
+                onPress={() => setModalVisible(true)}
+                className="bg-blue-500 text-white rounded px-4 py-2"
+              />
             </View>
           </View>
         )}
         ListEmptyComponent={() => (
           <EmptyState
-            title="No Videos Found"
-            subtitle="No videos created yet"
+            title="No Projects Found"
+            subtitle="No projects created yet"
           />
         )}
         refreshControl={
@@ -108,11 +119,22 @@ const Home = () => {
         }
       />
       <Button
-        title="profile"
+        title="home"
         onPress={() => {
-          router.push("/profile");
+          router.push("/home");
         }}
       />
+
+      {/* Modal for creating a project */}
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <CreateProject onSubmit={handleCreateProject} />
+        <Button title="Close" onPress={() => setModalVisible(false)} />
+      </Modal>
     </SafeAreaView>
   );
 };
