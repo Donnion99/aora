@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, StyleSheet, StatusBar } from "react-native";
 import {
-  Button,
   FlatList,
   Image,
   RefreshControl,
@@ -9,8 +8,8 @@ import {
   View,
   TouchableOpacity,
   Modal,
+  Button,
 } from "react-native";
-import { logout } from "./(tabs)/profile";
 import { images } from "../constants";
 import useAppwrite from "../lib/useAppwrite";
 import {
@@ -24,12 +23,10 @@ import ProjectCard from "../components/ProjectCard";
 import { useGlobalContext } from "../context/GlobalProvider";
 import { router } from "expo-router";
 import CreateProject from "../components/CreateProject"; // Import the CreateProject component
-
 import { icons } from "../constants";
 
 const Home = () => {
   const { user, setUser, setIsLogged } = useGlobalContext();
-
   const { data: posts, refetch } = useAppwrite(getAllProjects);
   const { data: latestPosts } = useAppwrite(getLatestPosts);
 
@@ -52,27 +49,28 @@ const Home = () => {
   // Function to handle the project creation
   const handleCreateProject = (projectData) => {
     console.log("Project Created:", projectData);
-    // Here, you can call your function to save the project data
-    // Close the modal after submission
     setModalVisible(false);
   };
 
   return (
-    <SafeAreaView className="bg-primary">
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#0c0c0c" />
       <FlatList
         data={posts}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
           <ProjectCard
             title={item.Project_Name}
-            description={item.Description} // Assuming you have a description field
-            creator={user.username}
-            avatar={user.avatar}
+            description={item.Description}
+            creator={user?.username}
+            avatar={user?.avatar}
+            startDate={item.Start_Date}
+            clientName={item.Client_Name}
           />
         )}
         ListHeaderComponent={() => (
-          <View className="flex my-6 px-4 space-y-6">
-            <View className="flex justify-between items-start flex-row mb-6">
+          <View style={styles.header}>
+            <View style={styles.headerTop}>
               <View>
                 <Text className="font-pmedium text-sm text-gray-100">
                   Welcome Back
@@ -81,30 +79,21 @@ const Home = () => {
                   {user?.username}
                 </Text>
               </View>
-              <View className="mt-1.5">
-                <TouchableOpacity
-                  onPress={logout}
-                  className="flex w-full items-end mb-10"
-                >
+              <View style={styles.logoutButton}>
+                <TouchableOpacity onPress={logout}>
                   <Image
                     source={icons.logout}
                     resizeMode="contain"
-                    className="w-6 h-6"
+                    style={styles.logoutIcon}
                   />
                 </TouchableOpacity>
               </View>
             </View>
             <SearchInput placeholder={"Search your Project"} />
-            <View className="w-full flex-1 pt-5 pb-8">
-              <Text className="text-lg font-pregular text-gray-100 mb-3">
+            <View style={styles.projectsContainer}>
+              <Text className="text-lg font-pregular text-gray-100 my-3">
                 My Projects
               </Text>
-              {/* Add the Create Project button here */}
-              <Button
-                title="Create Project"
-                onPress={() => setModalVisible(true)}
-                className="bg-blue-500 text-white rounded px-4 py-2"
-              />
             </View>
           </View>
         )}
@@ -112,18 +101,22 @@ const Home = () => {
           <EmptyState
             title="No Projects Found"
             subtitle="No projects created yet"
+            btntitle={"Create Project"}
+            handlebtn={() => setModalVisible(true)}
           />
         )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
-      <Button
-        title="home"
-        onPress={() => {
-          router.push("/home");
-        }}
-      />
+
+      {/* Circular Button at bottom-right */}
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.buttonText}>+</Text>
+      </TouchableOpacity>
 
       {/* Modal for creating a project */}
       <Modal
@@ -133,10 +126,69 @@ const Home = () => {
         onRequestClose={() => setModalVisible(false)}
       >
         <CreateProject onSubmit={handleCreateProject} />
-        <Button title="Close" onPress={() => setModalVisible(false)} />
+        {/* <Button title="Close" onPress={() => setModalVisible(false)} /> */}
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => setModalVisible(false)}
+        >
+          <Text style={styles.closeButtonText}>Close</Text>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );
 };
+
+// Styles for full screen layout and circular button
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#0c0c0c",
+    paddingTop: StatusBar.currentHeight,
+  },
+  header: {
+    marginVertical: 16,
+    paddingHorizontal: 16,
+    spaceY: 16,
+  },
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  logoutButton: {
+    marginTop: 12,
+  },
+  logoutIcon: {
+    width: 24,
+    height: 24,
+  },
+  floatingButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 20,
+    backgroundColor: "#FF9C01", // Using the accent color for consistency
+    borderRadius: 30, // Makes the button circular
+    width: 60, // Size of the button
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000", // Maintain shadow color
+    shadowOffset: { width: 0, height: 5 }, // Adjusted for a deeper shadow
+    shadowOpacity: 0.5, // Increased for a stronger effect
+    shadowRadius: 6, // Softer shadow
+    elevation: 10, // Higher elevation for a pronounced effect
+  },
+  floatingButtonText: {
+    color: "#161622", // Text color for contrast
+    fontWeight: "",
+    fontSize: 24, // Larger text for visibility
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 30,
+    fontWeight: "bold",
+  },
+});
 
 export default Home;
