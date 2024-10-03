@@ -49,8 +49,7 @@ const Welcome = () => {
           </View>
 
           <Text className="text-sm font-pregular text-gray-100 mt-7 text-center">
-            Where Creativity Meets Innovation: Embark on a Journey of Limitless
-            Exploration with Civix
+            Crafting Tomorrow’s Infrastructure, One Project at a Time with CIVIX
           </Text>
 
           <CustomButton
