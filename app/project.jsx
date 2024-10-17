@@ -60,12 +60,13 @@ const Home = () => {
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
           <ProjectCard
-            title={item.Project_Name}
-            description={item.Description}
-            creator={user?.username}
-            avatar={user?.avatar}
+            Project_Type={item.Project_Type}
+            Budget={item.Budget}
+            // creator={user?.username}
+            // avatar={user?.avatar}
             startDate={item.Start_Date}
             clientName={item.Client_Name}
+            imageUrl={item.image}
           />
         )}
         ListHeaderComponent={() => (
@@ -125,14 +126,17 @@ const Home = () => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <CreateProject onSubmit={handleCreateProject} />
+        <CreateProject
+          onSubmit={handleCreateProject}
+          onClose={() => setModalVisible(false)}
+        />
         {/* <Button title="Close" onPress={() => setModalVisible(false)} /> */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.closeButton}
           onPress={() => setModalVisible(false)}
         >
           <Text style={styles.closeButtonText}>Close</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </Modal>
     </SafeAreaView>
   );
@@ -188,6 +192,17 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 30,
     fontWeight: "bold",
+  },
+  closeButtonText: {
+    color: "#161622", // Dark background color for text contrast
+    fontWeight: "bold", // Bold font to stand out
+    fontSize: 16, // Moderate font size
+    padding: 10, // Padding around the text
+    textAlign: "center", // Center the text
+    backgroundColor: "#FF9C01", // Bright orange background (consistent with theme)
+    borderRadius: 10, // Rounded edges for consistency
+    marginTop: 10, // Space above the button
+    width: 100, // Fixed width for the button
   },
 });
 
